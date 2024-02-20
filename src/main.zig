@@ -34,7 +34,7 @@ pub fn main() !void {
         const samples_read = bytes_read / @sizeOf(i32);
         if (bytes_read > 0) {
             const result_count = try core.push(buffer[0..samples_read], out_buffer);
-            bytes_written += try writer.write(std.mem.sliceAsBytes(out_buffer[0..result_count]));
+            bytes_written += try writer.write(std.mem.sliceAsBytes(out_buffer[0 .. 2 * result_count]));
             try writer.flush(); // don't forget to flush!
             debug_print("out buffer: {any}", .{out_buffer}); //
         } else {
