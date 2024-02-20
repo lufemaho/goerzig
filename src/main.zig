@@ -3,6 +3,7 @@ const clap = @import("zig-clap/clap.zig");
 const InputError = error{ NotEnoughArguments, PhasesValueInvalid, BufferSizeTooSmall };
 
 pub fn main() !void {
+    // prepare goertzel core
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
     const settings = try parse_cli_args(gpa.allocator());
@@ -25,14 +26,16 @@ pub fn main() !void {
     // file output buffer
     const stdout_file = std.io.getStdOut().writer();
     var writer = std.io.bufferedWriter(stdout_file);
-    var out_buffer = try gpa.allocator().alignedAlloc(f64, 32, 2 * settings.k.len * settings.phases * buffer_size / settings.symbol_size);
+    const samples_per_phase = settings.symbol_size / settings.phases;
+    var out_buffer = try gpa.allocator().alignedAlloc(f64, 32, 2 * settings.k.len * buffer_size / (samples_per_phase));
     defer gpa.allocator().free(out_buffer);
 
+    // process samples
     while (true) {
         debug_print("pushing buffer", .{});
         const bytes_read = try inputfile.readAll(std.mem.sliceAsBytes(buffer));
         const samples_read = bytes_read / @sizeOf(i32);
-        if (bytes_read > 0) {
+        if (samples_read > 0 and samples_read % samples_per_phase == 0) {
             const result_count = try core.push(buffer[0..samples_read], out_buffer);
             bytes_written += try writer.write(std.mem.sliceAsBytes(out_buffer[0 .. 2 * result_count]));
             debug_print("out buffer: {any}", .{out_buffer}); //
