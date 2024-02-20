@@ -158,13 +158,8 @@ const Core = struct {
             self.state_before_two[vec_idx][sub_idx] = 0.0;
         }
     }
-    // pub fn format(self: Core, comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
-    //     _ = writer;
-    //     _ = options;
-    //     _ = fmt;
-    //     _ = self;
-    // }
 };
+
 const CLIArgs = struct {
     allocator: std.mem.Allocator,
     phases: usize,
@@ -209,11 +204,13 @@ const CLIArgs = struct {
             .allocator = undefined,
         };
     }
+
     fn deinit(self: CLIArgs) void {
         if (!self.help_only)
             self.allocator.free(self.k);
     }
 };
+
 fn parse_cli_args(allocator: std.mem.Allocator) !CLIArgs {
     // First we specify what parameters our program can take.
     // We can use `parseParamsComptime` to parse a string into an array of `Param(Help)`
