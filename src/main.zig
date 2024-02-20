@@ -35,12 +35,12 @@ pub fn main() !void {
         if (bytes_read > 0) {
             const result_count = try core.push(buffer[0..samples_read], out_buffer);
             bytes_written += try writer.write(std.mem.sliceAsBytes(out_buffer[0 .. 2 * result_count]));
-            try writer.flush(); // don't forget to flush!
             debug_print("out buffer: {any}", .{out_buffer}); //
         } else {
             break;
         }
     }
+    try writer.flush(); // don't forget to flush!
     try std.fmt.format(std.io.getStdErr().writer(), "\nbytes written: {d}\n", .{bytes_written});
 }
 const PushError = error{ WrongSampleCount, OutputBufferTooSmall };
@@ -260,8 +260,8 @@ fn parse_cli_args(allocator: std.mem.Allocator) !CLIArgs {
     return CLIArgs.init(allocator, phases, symbol_size, res.positionals[1..], buffer_size, res.args.help != 0, res.args.file);
 }
 
-fn debug_print(comptime fmt: []const u8, args: anytype) void {
-    const DEBUG_PRINT = true;
+inline fn debug_print(comptime fmt: []const u8, args: anytype) void {
+    const DEBUG_PRINT = false;
     if (DEBUG_PRINT) {
         std.debug.print(fmt, args);
         std.debug.print("\n", .{});
