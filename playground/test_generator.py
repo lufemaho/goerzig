@@ -1,7 +1,6 @@
 import numpy as np
 import argparse
 import sys
-import matplotlib.pyplot as plt
 
 
 parser = argparse.ArgumentParser()
@@ -23,13 +22,13 @@ _ = parser.add_argument(
     default=2,
     help="Frequency bin at which a sine is generated. Default is two.",
 )
-
 _ = parser.add_argument(
     "--amplitude",
     type=int,
     default=10**6,
     help="Amplitude of the generated signal. Default is 10^6.",
 )
+
 
 _ = parser.add_argument(
     "--plot",
@@ -69,5 +68,12 @@ sys.stderr.write("\n\n")
 file.buffer.write(data.tobytes())
 file.close()
 if nspace.plot:
-    plt.plot(data)
-    plt.show()
+    if "matplotlib" not in sys.modules:
+        print("Need to install matplotlib (and a interactive backend).")
+    elif data.size > 100_000:
+        print("data too large for plotting.")
+    else:
+        import matplotlib.pyplot as plt
+
+        plt.plot(data)
+        plt.show()
